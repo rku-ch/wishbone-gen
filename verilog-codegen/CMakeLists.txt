@@ -1,0 +1,10 @@
+add_library(verilog-codegen 
+    identifier.hpp
+    module.cpp
+    module.hpp
+    token.cpp
+    token.hpp
+    tree_helper.hpp
+    tree.cpp
+    tree.hpp
+)
