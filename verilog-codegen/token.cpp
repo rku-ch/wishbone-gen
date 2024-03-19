@@ -37,14 +37,19 @@ KW(begin)
 KW(end)
 KW(endmodule)
 KW(input)
+KW(inout)
 KW(module)
 KW(output)
 KW(reg)
 KW(wire)
 
-// --- Operators
+// --- Operators and special characters
 
 Token coma(",", true);
 Token lPar("(", true);
 Token rPar(")", true);
+Token lBracket("[", true);
+Token rBracket("]", true);
+Token colon(":", true);
 Token eol(";", true);
+Token ws(" ",  true);

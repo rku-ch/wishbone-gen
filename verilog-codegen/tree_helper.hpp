@@ -10,17 +10,19 @@
 class LineTree : public Tree {
 public:
 
-    
-
     /**
-     * 
+     * Append a token at the end of the line 
     */
-    // TODO: overload "+" operator to add/concatenate a TOKEN to the same line 
-    // TODO: implementation should also overload "TOKEN + TOKEN" to return LineTree
-    //   So that we can write most lines as a concatenation of token
-    
     LineTree& operator+=(const Token& token);
 
+    /**
+     * Append a token at the end of the line
+    */
+    LineTree& operator+(const Token& token);
+
+    /**
+     * Concatenate two LineTrees
+    */
     LineTree& operator+=(const LineTree& l2);
 
     std::string to_string();

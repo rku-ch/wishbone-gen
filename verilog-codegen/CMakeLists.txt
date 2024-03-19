@@ -1,10 +1,11 @@
 add_library(verilog-codegen 
-    identifier.hpp
     module.cpp
-    module.hpp
     token.cpp
-    token.hpp
-    tree_helper.hpp
     tree.cpp
-    tree.hpp
+    module_items/data.cpp
+)
+
+target_include_directories(verilog-codegen INTERFACE
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/module_items"
 )

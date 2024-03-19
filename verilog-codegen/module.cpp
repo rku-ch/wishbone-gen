@@ -6,9 +6,10 @@ Module::Module(Identifier module_id, std::vector<Identifier> ports, BlockTree &c
     module_declaration += module_id;
     if(ports.size() > 0) {
         module_declaration += lPar;
-        for(Identifier port : ports) {
-            module_declaration += port + coma;
+        for(int i = 0; i < ports.size()-1; i++) {
+            module_declaration += ports[i] + coma;
         }
+        module_declaration += ports[ports.size()-1];
         module_declaration += rPar;
     }
     module_declaration += eol;    

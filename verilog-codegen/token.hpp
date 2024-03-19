@@ -38,6 +38,7 @@ extern Token begin;
 extern Token end;
 extern Token endmodule;
 extern Token input;
+extern Token inout;
 extern Token module;
 extern Token output;
 extern Token reg;
@@ -48,7 +49,10 @@ extern Token wire;
 extern Token coma;
 extern Token lPar;
 extern Token rPar;
+extern Token lBracket;
+extern Token rBracket;
+extern Token colon;
 extern Token eol;
-
+extern Token ws; 
 
 #endif

@@ -17,6 +17,11 @@ LineTree& LineTree::operator+=(const Token& token) {
     return *this;
 }
 
+LineTree& LineTree::operator+(const Token& token) {
+    line.push_back(token);
+    return *this;
+}
+
 LineTree& LineTree::operator+=(const LineTree& l2) {
     line.insert(line.end(), l2.line.begin(), l2.line.end());
     return *this;
