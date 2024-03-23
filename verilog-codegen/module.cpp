@@ -14,13 +14,13 @@ Module::Module(Identifier module_id, std::vector<Identifier> ports, BlockTree &c
     }
     module_declaration += eol;    
 
-};
+    };
 
-std::string Module::to_string() {
+std::string Module::to_string(int indent) {
     std::string str("");
-    str.append(module_declaration.to_string() + "\n");
-    str.append(content.to_string(1) + "\n");
-    str.append(endmodule.to_string());
+    str.append(module_declaration.to_string(indent));
+    str.append(content.to_string(indent + 1));
+    str.append(endmodule.to_string(indent));
     return str;
 }
 

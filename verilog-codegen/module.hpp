@@ -14,7 +14,7 @@ public:
     */
     void output_to_file(std::string filename);
 
-    std::string to_string();
+    std::string to_string(int indent = 0);
 private:
     LineTree module_declaration;
 

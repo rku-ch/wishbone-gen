@@ -6,7 +6,7 @@
 
 /**
  * Helper for the common syntax for all types of "Data" in verilog
- * "Data" includes ports, registers and wires
+ * "Data" includes in/out ports, registers and wires
  * 
 */
 class Data : public LineTree {
@@ -24,7 +24,7 @@ public:
     Data(Token type, Identifier id, int range);
 
     /**
-     * Alternative syntax closer to the actual Verilog syntax for completeness
+     * Alternative syntax closer to the actual Verilog syntax, for completeness
     */
     Data(Token type, int msb, int lsb, Identifier id);
 

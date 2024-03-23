@@ -18,8 +18,8 @@ Token::~Token(){
     }
 }
 
-std::string Token::to_string() {
-    return value;
+std::string Token::to_string(int indent) {
+    return INDENT_STR(indent) + value;
 }
 
 /**
@@ -34,8 +34,10 @@ std::string Token::to_string() {
 
 KW(always)
 KW(begin)
+Token elseKw("else", true);
 KW(end)
 KW(endmodule)
+Token ifKw("if", true);
 KW(input)
 KW(inout)
 KW(module)
@@ -52,4 +54,4 @@ Token lBracket("[", true);
 Token rBracket("]", true);
 Token colon(":", true);
 Token eol(";", true);
-Token ws(" ",  true);
+Token ws(" ",  true); 

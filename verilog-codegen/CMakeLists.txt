@@ -3,6 +3,7 @@ add_library(verilog-codegen
     token.cpp
     tree.cpp
     module_items/data.cpp
+    module_items/conditionals.cpp
 )
 
 target_include_directories(verilog-codegen INTERFACE

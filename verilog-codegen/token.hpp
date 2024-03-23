@@ -19,7 +19,7 @@ public:
     Token(std::string value, bool reserve);
     ~Token();
 
-    std::string to_string();
+    std::string to_string(int indent = 0);
 private:
     std::string value;
 
@@ -28,15 +28,17 @@ private:
 
 /**
  * Declare reserved Token for (most) verilog keywords and operators
- * 
+ * Tokens that conflict with a c++ keyword add a "Kw" suffix
 */
 
 // --- Keywords
 
 extern Token always;
 extern Token begin;
+extern Token elseKw;
 extern Token end;
 extern Token endmodule;
+extern Token ifKw;
 extern Token input;
 extern Token inout;
 extern Token module;
@@ -44,7 +46,7 @@ extern Token output;
 extern Token reg;
 extern Token wire;
 
-// --- Operators
+// --- Operators and special characters
 
 extern Token coma;
 extern Token lPar;
@@ -53,6 +55,6 @@ extern Token lBracket;
 extern Token rBracket;
 extern Token colon;
 extern Token eol;
-extern Token ws; 
+extern Token ws;
 
 #endif

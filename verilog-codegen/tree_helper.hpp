@@ -1,14 +1,18 @@
 #ifndef VERILOG_CODGEN_TREE_HELPER_INCLUDED
 #define VERILOG_CODGEN_TREE_HELPER_INCLUDED
 
+#include <memory>
+
 #include "token.hpp"
 
 /**
- * Helper subclass of a tree that sould allow to construct a single line 
- * instruction an convert it to a string properly
+ * Helper subclass of Tree to construct a single line using Tokens
+ * Calling to_string on a LineTree always end with a line break 
 */
 class LineTree : public Tree {
 public:
+
+    LineTree();
 
     /**
      * Append a token at the end of the line 
@@ -25,36 +29,37 @@ public:
     */
     LineTree& operator+=(const LineTree& l2);
 
-    std::string to_string();
+    /**
+     * Concatenate two LineTrees
+    */
+    LineTree& operator+(const LineTree& l2);
+
+    std::string to_string(int indent = 0);
 private:
     std::vector<Token> line;
 };
 
 
 /**
- * Helper subclass of a tree that sould allow to construct a block of code 
- * where every line has the same indentation
+ * Helper subclass of Tree to construct blocks of code with sub Trees of 
+ * arbitrary types
 */
 class BlockTree : public Tree {
 public:
     
-    
-    // TODO:  overload "+" operator to add LineTrees and/or concatenate BlockTrees
-    //   BlockTree + LineTree => BlockTree
-    //   BlockTree + BlockTree => BlockTree
-    BlockTree& operator+=(const LineTree& line);
-
+    /**
+     * Append any sub-tree after the last sub-tree in this block
+    */
+    BlockTree& operator+=(const std::shared_ptr<Tree>& tree);
+    /**
+     * Append all the sub-trees of another block after the last sub-tree of 
+     * this block
+    */
     BlockTree& operator+=(const BlockTree& block);
 
-    std::string to_string();
-
-
-    /**
-     * BlockTree additionally allows to pring with a indent for each line
-    */
     std::string to_string(int indent);
 private:
-    std::vector<LineTree> lines;
+    std::vector<std::shared_ptr<Tree>> trees;
 };
 
 LineTree operator+(const Token& t1,  const Token& t2);

@@ -1,7 +1,6 @@
 #include "tree_helper.hpp"
 
-#define INDENT_SIZE 4
-
+LineTree::LineTree(){}
 
 // Operation on trees
 
@@ -27,37 +26,46 @@ LineTree& LineTree::operator+=(const LineTree& l2) {
     return *this;
 }
 
-BlockTree& BlockTree::operator+=(const LineTree& line) {
-    lines.push_back(line);
+LineTree& LineTree::operator+(const LineTree& l2) {
+    *this += l2;
     return *this;
 }
+
+BlockTree& BlockTree::operator+=(const std::shared_ptr<Tree>& tree) {
+    trees.push_back(tree);
+    return *this;
+}
+
+// BlockTree& BlockTree::operator+=(const Token& token) {
+//     LineTree l;
+//     l += token;
+//     *this += l;
+//     return *this;
+// }
+
+// BlockTree& BlockTree::operator+=(const LineTree& line) {
+//     trees.push_back(line);
+//     return *this;
+// }
 
 BlockTree& BlockTree::operator+=(const BlockTree& block) {
-    lines.insert(lines.end(), block.lines.begin(), block.lines.end());
+    trees.insert(trees.end(), block.trees.begin(), block.trees.end());
     return *this;
 }
 
-std::string LineTree::to_string() {
+std::string LineTree::to_string(int indent) {
     std::string str("");
     for(Token token : line) {
         str.append(token.to_string());
     }
-    return str;
-}
-
-std::string BlockTree::to_string() {
-    std::string str("");
-    for(LineTree line : lines) {
-        str.append(line.to_string() + "\n");
-    }
-    return str;
+    return INDENT_STR(indent) + str + "\n";
 }
 
 std::string BlockTree::to_string(int indent) {
     std::string str("");
     std::string indent_str(INDENT_SIZE*indent, ' ');
-    for(LineTree line : lines) {
-        str.append(indent_str + line.to_string() + "\n");
+    for(auto tree : trees) {
+        str.append(tree->to_string(indent));
     }
     return str;
 }
