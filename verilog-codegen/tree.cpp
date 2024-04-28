@@ -36,18 +36,6 @@ BlockTree& BlockTree::operator+=(const std::shared_ptr<Tree>& tree) {
     return *this;
 }
 
-// BlockTree& BlockTree::operator+=(const Token& token) {
-//     LineTree l;
-//     l += token;
-//     *this += l;
-//     return *this;
-// }
-
-// BlockTree& BlockTree::operator+=(const LineTree& line) {
-//     trees.push_back(line);
-//     return *this;
-// }
-
 BlockTree& BlockTree::operator+=(const BlockTree& block) {
     trees.insert(trees.end(), block.trees.begin(), block.trees.end());
     return *this;

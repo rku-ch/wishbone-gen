@@ -2,7 +2,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <memorymap>
   <name>MemoryMap</name>
-  <description>Memory map with name of memory section, start address and size in Bytes
+  <description>Memory map with name of memory section, start address and size in Bytes</description>
   <memory_regions>
     <region>
       <name>Main Memory</name>

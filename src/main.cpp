@@ -3,11 +3,21 @@
 #include <string>
 #include <vector>
 
-#include "module.hpp"
-#include "all_items.hpp"
+
+#include <module.hpp>
+#include <all_items.hpp>
+#include <pugixml.hpp>
+
 
 int main(int argc, char const *argv[]) {
 
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file("../tests/memorymap.xml");
+
+    std::cout << "Load result: " << result.description() << std::endl;
+
+    std::cout << "Description: " << doc.child("memorymap").child("description").child_value() << std::endl;
+    
     // Test module
     Identifier moduleName("testModule");
     Identifier rst("reset");

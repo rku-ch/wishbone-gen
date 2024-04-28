@@ -43,6 +43,8 @@ private:
 /**
  * Helper subclass of Tree to construct blocks of code with sub Trees of 
  * arbitrary types
+ * shared_ptr<Tree> are necessary to allow any subtype of Tree to be added to 
+ * a block 
 */
 class BlockTree : public Tree {
 public:
@@ -51,6 +53,7 @@ public:
      * Append any sub-tree after the last sub-tree in this block
     */
     BlockTree& operator+=(const std::shared_ptr<Tree>& tree);
+    
     /**
      * Append all the sub-trees of another block after the last sub-tree of 
      * this block
