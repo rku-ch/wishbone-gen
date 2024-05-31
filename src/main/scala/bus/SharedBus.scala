@@ -1,103 +1,17 @@
-package bus
+package ch.epfl.lap.wishbone_gen.bus
 
+import ch.epfl.lap.wishbone_gen._
 import chisel3._
 // _root_ disambiguates from package chisel3.util.circt if user imports chisel3.util._
-import _root_.circt.stage.ChiselStage
 import chisel3.util.MuxLookup
 import chisel3.util.Counter
 import chisel3.util.MuxCase
 import chisel3.util.OHToUInt
 
-class MasterBundle(description: MasterComponent, useError: Boolean, useRetry: Boolean) extends Bundle {
-  println(description.name)
-  // Master Outputs
-  val adr_o = Input(UInt(32.W)).autoSeed(s"${description.name}_adr_o")
-  val dat_o = Input(UInt(32.W)).autoSeed(s"${description.name}_dat_o")
-  val sel_o = Input(UInt(4.W)).autoSeed(s"${description.name}_sel_o")
-  val we_o = Input(Bool()).autoSeed(s"${description.name}_we_o")
-  val stb_o = Input(Bool()).autoSeed(s"${description.name}_stb_o")
-  val cyc_o = Input(Bool()).autoSeed(s"${description.name}_cyc_o")
-  
-  // Master inputs
-  val dat_i = Output(UInt(32.W)).autoSeed(s"${description.name}_dat_i")
-  val ack_i = Output(Bool()).autoSeed(s"${description.name}_ack_i")
-  val err_i = if (useError) Some(Output(Bool()).autoSeed(s"${description.name}_err_i")) else None
-  val rty_i = if (useRetry) Some(Output(Bool()).autoSeed(s"${description.name}_rty_i")) else None
-}
 
-class SlaveBundle(description: SlaveComponent, useError: Boolean, useRetry: Boolean) extends Bundle {
+class SharedBus(busDescription: Description) extends BusModule(busDescription) {  
 
-  // Slave inputs
-  val adr_i = Output(UInt(32.W)).autoSeed(s"${description.name}_adr_i")
-  val dat_i = Output(UInt(32.W)).autoSeed(s"${description.name}_dat_i")
-  val sel_i = Output(UInt(4.W)).autoSeed(s"${description.name}_sel_i")
-  val we_i = Output(Bool()).autoSeed(s"${description.name}_we_i")
-  val stb_i = Output(Bool()).autoSeed(s"${description.name}_stb_i")
-  val cyc_i = Output(Bool()).autoSeed(s"${description.name}_cyc_i")
-  
-  // Slave outputs
-  val dat_o = Input(UInt(32.W)).autoSeed(s"${description.name}_dat_o")
-  val ack_o = Input(Bool()).autoSeed(s"${description.name}_ack_o")
-  val err_o = if (useError) Some(Input(Bool()).autoSeed(s"${description.name}_err_o")) else None
-  val rty_o = if (useRetry) Some(Input(Bool()).autoSeed(s"${description.name}_rty_o")) else None
-
-}
-
-
-class SharedBus(val busDescription: Description) extends Module {
-
-  // Both components descriptions and component IO bundles are stored in a map
-  // in ordered to always be properly indexed. This insure that in every 
-  // internal parts/modules (such as the arbiter and address comparator) the 
-  // "result" indexed with e.g. 1 is always associated with the singals of the 
-  // slave indexed 1 wothout needing to pass the complete IO bundle associated 
-  // with a given description
-
-  val masterDescriptions = busDescription.masterComponents.zipWithIndex
-    .map({case (master, i)  => {
-      i -> master
-    }}).toMap
-
-  val masterBundles = masterDescriptions.map({ case (i, master) => {
-    i -> IO(new MasterBundle(
-      master, 
-      busDescription.useError, 
-      busDescription.useRetry)
-    ).suggestName(master.name)
-  }})
-
-  val slaveDescriptions = busDescription.slaveComponents.zipWithIndex
-    .map({case (slave, i)  => {
-      i -> slave
-    }}).toMap
-
-  val slaveBundles = slaveDescriptions.map({ case (i, slave) => {
-    i -> IO(new SlaveBundle(
-      slave, 
-      busDescription.useError, 
-      busDescription.useRetry)
-    ).suggestName(slave.name)
-  }})
-
-  // --- Internal wires ---
-  // We use registers to determine which one was the last one accessed for 
-  // fairness but other than that the RoundRobin arbiter is fully combinatorial,
-  // outputs are always up to date
-  // This is not what they propose in the spec so maybe I shouldn't do it like that?
-  // The reason is: if we did that, the new master aquiring the bus may receive 
-  // an ack (or err or rty) that was not meant for it
-  // GNT = grant? I don't like that name I'll try to find one myself
-  // val counter = new Counter(orderedMasters.length)
-  // masterSelect := counter.value
-  // orderedMasters.foreach({ case (master, _, index) => {
-  //   when(counter.value === index.asUInt) {
-  //     when(master.cyc_o === false.B) {
-  //       counter.inc()   
-  //     }
-  //   }
-  // }})
-
-  // TODO:  move to it's own file
+  // TODO:  move to it's own file  
   // Arbiter :
   // Other people are more clever than me so I found a solution here:
   // https://abdullahyildiz.github.io/files/Arbiters-Design_Ideas_and_Coding_Styles.pdf
@@ -112,7 +26,7 @@ class SharedBus(val busDescription: Description) extends Module {
   val arbiterInputs = masterBundles.map({case (i, master) => i -> master.cyc_o})
   
   val mask = masterDescriptions.map( {case (i, master) => {
-    i -> Reg(Bool()).suggestName(s"${master.name}_mask")
+    i -> RegInit(false.B).suggestName(s"${master.name}_mask")
   }})
 
   // Select the first bit with value 1 
@@ -147,42 +61,64 @@ class SharedBus(val busDescription: Description) extends Module {
     .suggestName("unmasked_grant")
   val unmaskedGrantVecUInt = unmaskedGrantVec.asUInt.suggestName("unmasked_grant_vec")
   simplePriority.foreach({ case (i, value) => { unmaskedGrantVec(i) :=  value }})
-  // val maskedGrantVec = VecInit(maskedPriority.map(in => in._2).toSeq).asUInt
-  // val unmaskedGrantVec = VecInit(simplePriority.map(in => in._2).toSeq).asUInt
 
 
   val masterGrants = masterDescriptions.map( {case (i, master) => {
-    i -> Reg(Bool()).suggestName(s"${master.name}_grant")
+    i -> RegInit(false.B).suggestName(s"${master.name}_grant")
   }})
-  
-  val cyc_out = Reg(Bool())
+
+  val cyc_out = RegInit(false.B)
   cyc_out := (VecInit(arbiterInputs.map(in => in._2).toSeq).asUInt =/= 0.U)
   val masterSelect = Wire(UInt())
   masterSelect := 0.U
-
   when(maskedGrantVecUInt > 0.U) {
+    masterGrants.foreach({ case (i, masterGrant) => {
+      masterGrant := maskedPriority(i)
+    }})
     masterSelect := OHToUInt(maskedGrantVec)
+    mask.foreach({ case (i, iMask) => {
+      when(i.asUInt >= masterSelect){
+        iMask := true.B
+      }.otherwise {
+        iMask := false.B
+      }
+    }})
   }.elsewhen(unmaskedGrantVecUInt > 0.U) {
+    masterGrants.foreach({ case (i, masterGrant) => {
+      masterGrant := simplePriority(i)
+    }})
     masterSelect := OHToUInt(unmaskedGrantVec)
+    mask.foreach({ case (i, iMask) => {
+      when(i.asUInt >= masterSelect){
+        iMask := true.B
+      }.otherwise {
+        iMask := false.B
+      }
+    }})
+  }.otherwise {
+    masterGrants.foreach({ case (i, masterGrant) => {
+      masterGrant := false.B
+    }})
+    // We don't really care what master is selected by the muxes if no master is
+    // enabled anyway
+    // Mask should NOT be updated, otherwise we would bias toward low index masters
   }
 
   masterGrants.foreach( {case (i, masterGrant) => {
     when(maskedGrantVecUInt > 0.U) {
       masterGrant := maskedPriority(i)
+      // memorizedGrants(i) := maskedPriority(i)
     }.elsewhen(unmaskedGrantVecUInt > 0.U) {
       masterGrant := simplePriority(i)
+      // memorizedGrants(i) := simplePriority(i)
     }.otherwise {
-      masterGrant := masterGrants(i)
+      masterGrant := false.B
+      // memorizedGrants(i) := memorizedGrants(i)
     }
   }})
+  // We don't want to bias towards low index masters so we memorize the mask
 
-  mask.foreach({ case (i, iMask) => {
-    when(i.asUInt >= masterSelect){
-      iMask := true.B
-    }.otherwise {
-      iMask := false.B
-    }
-  }})
+  
 
   val masters = masterBundles.toSeq
   // // Master to slave wires 
@@ -206,7 +142,7 @@ class SharedBus(val busDescription: Description) extends Module {
   // Slaves to master wires
   // TODO: Move address comparator to a module
   val acmp = slaveDescriptions.map({ case (i, description) => {
-    val matchAdr = Wire(Bool())
+    val matchAdr = Wire(Bool()).suggestName(s"amcp_${i}")
     val endAdr = (description.startAddress.asUInt + description.size.asUInt)
     when((adr >= description.startAddress.asUInt) & (adr < endAdr)) {
       matchAdr := true.B
@@ -216,7 +152,10 @@ class SharedBus(val busDescription: Description) extends Module {
     (i, matchAdr)
   }}).toMap
 
-  //TODO: probs incomplete/incorrect
+  invalidAddress := !acmp.foldLeft(false.B)({ case (acmpCurr, (_, acmpNext)) =>  
+    acmpCurr | acmpNext
+  })
+
   val dat_r = MuxCase(slaveBundles.head._2.dat_o,
       slaveBundles.map({ 
         case (i, slave) => {
@@ -265,16 +204,4 @@ class SharedBus(val busDescription: Description) extends Module {
     slave.stb_i := cyc_validated_stb & acmp(i)
   }})
 
-}
-
-/**
- * Generate Verilog sources and save it in file Bus.v
- */
-object SharedBus extends App {
-  val busDescription = new Description(args.head)
-
-  ChiselStage.emitSystemVerilogFile(
-    new SharedBus(busDescription),
-    firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info", "-lowering-options=disallowLocalVariables")
-  )
 }

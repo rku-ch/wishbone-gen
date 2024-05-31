@@ -9,7 +9,7 @@ lazy val root = (project in file("."))
     name := "wishbone-gen",
     libraryDependencies ++= Seq(
       "org.chipsalliance" %% "chisel" % chiselVersion,
-      "org.scalatest" %% "scalatest" % "3.2.16" % "test",
+      "org.scalatest" %% "scalatest" % "3.2.18" % "test",
     ),
     scalacOptions ++= Seq(
       "-language:reflectiveCalls",

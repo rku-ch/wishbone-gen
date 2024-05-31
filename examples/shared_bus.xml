@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--This file describes the a complete system -->
 <bus_description>
-  <options>
+  <configuration>
+    <description>
+      Includes all configurations that are global to the bus
+    </description>
     <error>true</error>
     <retry>false</retry>
     <bus_type>shared</bus_type> <!-- Only one implemented yet-->
-  </options>
+  </configuration>
   <arbiter>
     <description>
       List of all master components with additional informations for an arbiter
@@ -13,20 +16,16 @@
     <master_components>
       <component>
         <name>CPU Data Interface</name>
-        <priority>1</priority> <!-- Unused for current impl of shared bus -->
       </component>
       <component>
         <name>CPU Instruction Interface</name>
-        <priority>1</priority> 
       </component>
-      <!-- <component>
-        <name>Dummy Master Mux Test</name>
-        <priority>1</priority>
-      </component> -->
-      <!-- <component>
-        <name>Dummy Master Mux Test2</name>
-        <priority>1</priority>
-      </component> -->
+      <component>
+        <name>Dummy Master Test</name>
+      </component>
+      <component>
+        <name>Dummy Master Test2</name>
+      </component>
     </master_components>
   </arbiter>
   <memorymap>
