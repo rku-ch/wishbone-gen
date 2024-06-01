@@ -20,12 +20,6 @@
       <component>
         <name>CPU Instruction Interface</name>
       </component>
-      <component>
-        <name>Dummy Master Test</name>
-      </component>
-      <component>
-        <name>Dummy Master Test2</name>
-      </component>
     </master_components>
   </arbiter>
   <memorymap>

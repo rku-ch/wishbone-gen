@@ -9,7 +9,7 @@ import _root_.circt.stage.ChiselStage
   * appropriate tests
   */
 class Generators(busDescription: Description, outputPath: Option[String]) {
-    val args = outputPath match {
+    private val args = outputPath match {
       case Some(path) => Array("--target-dir", path)
       case None => Array[String]()
     }

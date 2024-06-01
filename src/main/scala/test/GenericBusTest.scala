@@ -18,6 +18,7 @@ import os.size
   *   (address comparator correctness + signal routing correctness)
   *  - The address comparator outputs on the address_error signal if an address
   *    is not part of the address space
+  *    (Invalid address signaling)
   */
 object GenericBusTest {
   def apply[T <: BusModule](bus: => T)  = {

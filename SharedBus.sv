@@ -20,24 +20,6 @@ module SharedBus(
   output [31:0] cpu_instruction_interface_dat_i,
   output        cpu_instruction_interface_ack_i,
                 cpu_instruction_interface_err_i,
-  input  [31:0] dummy_master_test_adr_o,
-                dummy_master_test_dat_o,
-  input  [3:0]  dummy_master_test_sel_o,
-  input         dummy_master_test_we_o,
-                dummy_master_test_stb_o,
-                dummy_master_test_cyc_o,
-  output [31:0] dummy_master_test_dat_i,
-  output        dummy_master_test_ack_i,
-                dummy_master_test_err_i,
-  input  [31:0] dummy_master_test2_adr_o,
-                dummy_master_test2_dat_o,
-  input  [3:0]  dummy_master_test2_sel_o,
-  input         dummy_master_test2_we_o,
-                dummy_master_test2_stb_o,
-                dummy_master_test2_cyc_o,
-  output [31:0] dummy_master_test2_dat_i,
-  output        dummy_master_test2_ack_i,
-                dummy_master_test2_err_i,
   output [31:0] main_memory_adr_i,
                 main_memory_dat_i,
   output [3:0]  main_memory_sel_i,
@@ -68,123 +50,64 @@ module SharedBus(
   output        invalid_address
 );
 
-  reg              cpu_data_interface_mask;
-  reg              cpu_instruction_interface_mask;
-  reg              dummy_master_test_mask;
-  reg              dummy_master_test2_mask;
-  wire             unmasked_grant_1 =
+  reg         cpu_data_interface_mask;
+  reg         cpu_instruction_interface_mask;
+  wire        unmasked_grant_1 =
     ~cpu_data_interface_cyc_o & cpu_instruction_interface_cyc_o;
-  wire             unmasked_grant_2 =
-    ~cpu_data_interface_cyc_o & ~cpu_instruction_interface_cyc_o
-    & dummy_master_test_cyc_o;
-  wire             unmasked_grant_3 =
-    ~cpu_data_interface_cyc_o & ~cpu_instruction_interface_cyc_o
-    & ~dummy_master_test_cyc_o & dummy_master_test2_cyc_o;
-  wire             masked_grant_0 = cpu_data_interface_cyc_o & cpu_data_interface_mask;
-  wire             cpu_instruction_interface_masked_input =
-    cpu_instruction_interface_cyc_o & cpu_instruction_interface_mask;
-  wire             dummy_master_test_masked_input =
-    dummy_master_test_cyc_o & dummy_master_test_mask;
-  wire             masked_grant_1 =
-    ~masked_grant_0 & cpu_instruction_interface_masked_input;
-  wire             masked_grant_2 =
-    ~masked_grant_0 & ~cpu_instruction_interface_masked_input
-    & dummy_master_test_masked_input;
-  wire             masked_grant_3 =
-    ~masked_grant_0 & ~cpu_instruction_interface_masked_input
-    & ~dummy_master_test_masked_input & dummy_master_test2_cyc_o
-    & dummy_master_test2_mask;
-  wire [3:0]       masked_grant_vec =
-    {masked_grant_3, masked_grant_2, masked_grant_1, masked_grant_0};
-  wire [3:0]       unmasked_grant_vec =
-    {unmasked_grant_3, unmasked_grant_2, unmasked_grant_1, cpu_data_interface_cyc_o};
-  reg              cpu_data_interface_grant;
-  reg              cpu_instruction_interface_grant;
-  reg              dummy_master_test_grant;
-  reg              dummy_master_test2_grant;
-  reg              cyc_out;
-  wire [1:0]       masterSelect =
-    (|masked_grant_vec)
-      ? {|{masked_grant_3, masked_grant_2}, masked_grant_3 | masked_grant_1}
-      : (|unmasked_grant_vec)
-          ? {|{unmasked_grant_3, unmasked_grant_2}, unmasked_grant_3 | unmasked_grant_1}
-          : 2'h0;
-  wire [3:0][31:0] _GEN =
-    {{dummy_master_test2_adr_o},
-     {dummy_master_test_adr_o},
-     {cpu_instruction_interface_adr_o},
-     {cpu_data_interface_adr_o}};
-  wire [3:0][31:0] _GEN_0 =
-    {{dummy_master_test2_dat_o},
-     {dummy_master_test_dat_o},
-     {cpu_instruction_interface_dat_o},
-     {cpu_data_interface_dat_o}};
-  wire [3:0][3:0]  _GEN_1 =
-    {{dummy_master_test2_sel_o},
-     {dummy_master_test_sel_o},
-     {cpu_instruction_interface_sel_o},
-     {cpu_data_interface_sel_o}};
-  wire [3:0]       _GEN_2 =
-    {{dummy_master_test2_we_o},
-     {dummy_master_test_we_o},
-     {cpu_instruction_interface_we_o},
-     {cpu_data_interface_we_o}};
-  wire [3:0]       _GEN_3 =
-    {{dummy_master_test2_stb_o},
-     {dummy_master_test_stb_o},
-     {cpu_instruction_interface_stb_o},
-     {cpu_data_interface_stb_o}};
-  wire             amcp_0 = _GEN[masterSelect][31:28] != 4'hF;
-  wire             dat_r_lower_bound_1 = _GEN[masterSelect] > 32'hEFFFFFFF;
-  wire             amcp_1 = dat_r_lower_bound_1 & _GEN[masterSelect] < 32'hF0000DAC;
-  wire             dat_r_lower_bound_2 = _GEN[masterSelect] > 32'hF0000DAB;
-  wire             amcp_2 = dat_r_lower_bound_2 & _GEN[masterSelect] < 32'hF0000DB0;
-  wire [31:0]      dat_r =
-    _GEN[masterSelect][31:28] != 4'hF
+  wire        masked_grant_0 = cpu_data_interface_cyc_o & cpu_data_interface_mask;
+  wire        masked_grant_1 =
+    ~masked_grant_0 & cpu_instruction_interface_cyc_o & cpu_instruction_interface_mask;
+  wire [1:0]  masked_grant_vec = {masked_grant_1, masked_grant_0};
+  wire [1:0]  unmasked_grant_vec = {unmasked_grant_1, cpu_data_interface_cyc_o};
+  reg         cpu_data_interface_grant;
+  reg         cpu_instruction_interface_grant;
+  reg         cyc_out;
+  wire        _GEN = (|unmasked_grant_vec) & unmasked_grant_1;
+  wire        masterSelect = (|masked_grant_vec) ? masked_grant_1 : _GEN;
+  wire [31:0] adr =
+    masterSelect ? cpu_instruction_interface_adr_o : cpu_data_interface_adr_o;
+  wire [31:0] dat_w =
+    masterSelect ? cpu_instruction_interface_dat_o : cpu_data_interface_dat_o;
+  wire [3:0]  sel =
+    masterSelect ? cpu_instruction_interface_sel_o : cpu_data_interface_sel_o;
+  wire        we =
+    masterSelect ? cpu_instruction_interface_we_o : cpu_data_interface_we_o;
+  wire        amcp_0 = adr[31:28] != 4'hF;
+  wire        dat_r_lower_bound_1 = adr > 32'hEFFFFFFF;
+  wire        amcp_1 = dat_r_lower_bound_1 & adr < 32'hF0000DAC;
+  wire        dat_r_lower_bound_2 = adr > 32'hF0000DAB;
+  wire        amcp_2 = dat_r_lower_bound_2 & adr < 32'hF0000DB0;
+  wire [31:0] dat_r =
+    adr[31:28] != 4'hF
       ? main_memory_dat_o
-      : dat_r_lower_bound_1 & _GEN[masterSelect] < 32'hF0000DAC
+      : dat_r_lower_bound_1 & adr < 32'hF0000DAC
           ? led_matrix_0_dat_o
-          : dat_r_lower_bound_2 & _GEN[masterSelect] < 32'hF0000DB0
+          : dat_r_lower_bound_2 & adr < 32'hF0000DB0
               ? switches_0_dat_o
               : main_memory_dat_o;
-  wire             ack = main_memory_ack_o | led_matrix_0_ack_o | switches_0_ack_o;
-  wire             err = main_memory_err_o | led_matrix_0_err_o | switches_0_err_o;
-  wire             cyc_validated_stb = _GEN_3[masterSelect] & cyc_out;
+  wire        ack = main_memory_ack_o | led_matrix_0_ack_o | switches_0_ack_o;
+  wire        err = main_memory_err_o | led_matrix_0_err_o | switches_0_err_o;
+  wire        cyc_validated_stb =
+    (masterSelect ? cpu_instruction_interface_stb_o : cpu_data_interface_stb_o) & cyc_out;
   always @(posedge clock) begin
     if (reset) begin
       cpu_data_interface_mask <= 1'h0;
       cpu_instruction_interface_mask <= 1'h0;
-      dummy_master_test_mask <= 1'h0;
-      dummy_master_test2_mask <= 1'h0;
       cpu_data_interface_grant <= 1'h0;
       cpu_instruction_interface_grant <= 1'h0;
-      dummy_master_test_grant <= 1'h0;
-      dummy_master_test2_grant <= 1'h0;
       cyc_out <= 1'h0;
     end
     else begin
-      if ((|masked_grant_vec) | (|unmasked_grant_vec)) begin
-        cpu_data_interface_mask <= masterSelect == 2'h0;
-        cpu_instruction_interface_mask <= ~(masterSelect[1]);
-        dummy_master_test_mask <= masterSelect != 2'h3;
-      end
-      dummy_master_test2_mask <=
-        (|masked_grant_vec) | (|unmasked_grant_vec) | dummy_master_test2_mask;
+      if ((|masked_grant_vec) | (|unmasked_grant_vec))
+        cpu_data_interface_mask <= ~masterSelect;
+      cpu_instruction_interface_mask <=
+        (|masked_grant_vec) | (|unmasked_grant_vec) | cpu_instruction_interface_mask;
       cpu_data_interface_grant <=
         (|masked_grant_vec)
           ? masked_grant_0
           : (|unmasked_grant_vec) & cpu_data_interface_cyc_o;
-      cpu_instruction_interface_grant <=
-        (|masked_grant_vec) ? masked_grant_1 : (|unmasked_grant_vec) & unmasked_grant_1;
-      dummy_master_test_grant <=
-        (|masked_grant_vec) ? masked_grant_2 : (|unmasked_grant_vec) & unmasked_grant_2;
-      dummy_master_test2_grant <=
-        (|masked_grant_vec) ? masked_grant_3 : (|unmasked_grant_vec) & unmasked_grant_3;
-      cyc_out <=
-        |{dummy_master_test2_cyc_o,
-          dummy_master_test_cyc_o,
-          cpu_instruction_interface_cyc_o,
-          cpu_data_interface_cyc_o};
+      cpu_instruction_interface_grant <= (|masked_grant_vec) ? masked_grant_1 : _GEN;
+      cyc_out <= |{cpu_instruction_interface_cyc_o, cpu_data_interface_cyc_o};
     end
   end // always @(posedge)
   assign cpu_data_interface_dat_i = dat_r;
@@ -193,28 +116,22 @@ module SharedBus(
   assign cpu_instruction_interface_dat_i = dat_r;
   assign cpu_instruction_interface_ack_i = ack & cpu_instruction_interface_grant;
   assign cpu_instruction_interface_err_i = err & cpu_instruction_interface_grant;
-  assign dummy_master_test_dat_i = dat_r;
-  assign dummy_master_test_ack_i = ack & dummy_master_test_grant;
-  assign dummy_master_test_err_i = err & dummy_master_test_grant;
-  assign dummy_master_test2_dat_i = dat_r;
-  assign dummy_master_test2_ack_i = ack & dummy_master_test2_grant;
-  assign dummy_master_test2_err_i = err & dummy_master_test2_grant;
-  assign main_memory_adr_i = _GEN[masterSelect];
-  assign main_memory_dat_i = _GEN_0[masterSelect];
-  assign main_memory_sel_i = _GEN_1[masterSelect];
-  assign main_memory_we_i = _GEN_2[masterSelect];
+  assign main_memory_adr_i = adr;
+  assign main_memory_dat_i = dat_w;
+  assign main_memory_sel_i = sel;
+  assign main_memory_we_i = we;
   assign main_memory_stb_i = cyc_validated_stb & amcp_0;
   assign main_memory_cyc_i = cyc_out;
-  assign led_matrix_0_adr_i = _GEN[masterSelect];
-  assign led_matrix_0_dat_i = _GEN_0[masterSelect];
-  assign led_matrix_0_sel_i = _GEN_1[masterSelect];
-  assign led_matrix_0_we_i = _GEN_2[masterSelect];
+  assign led_matrix_0_adr_i = adr;
+  assign led_matrix_0_dat_i = dat_w;
+  assign led_matrix_0_sel_i = sel;
+  assign led_matrix_0_we_i = we;
   assign led_matrix_0_stb_i = cyc_validated_stb & amcp_1;
   assign led_matrix_0_cyc_i = cyc_out;
-  assign switches_0_adr_i = _GEN[masterSelect];
-  assign switches_0_dat_i = _GEN_0[masterSelect];
-  assign switches_0_sel_i = _GEN_1[masterSelect];
-  assign switches_0_we_i = _GEN_2[masterSelect];
+  assign switches_0_adr_i = adr;
+  assign switches_0_dat_i = dat_w;
+  assign switches_0_sel_i = sel;
+  assign switches_0_we_i = we;
   assign switches_0_stb_i = cyc_validated_stb & amcp_2;
   assign switches_0_cyc_i = cyc_out;
   assign invalid_address = ~(amcp_0 | amcp_1 | amcp_2);
