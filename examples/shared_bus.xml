@@ -16,9 +16,11 @@
     <master_components>
       <component>
         <name>CPU Data Interface</name>
+        <priority>1</priority>
       </component>
       <component>
         <name>CPU Instruction Interface</name>
+        <priority>1</priority>
       </component>
     </master_components>
   </arbiter>

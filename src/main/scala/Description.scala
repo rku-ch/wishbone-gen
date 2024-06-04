@@ -12,7 +12,7 @@ object BusType {
   // New bus types should be added there and treated in Generators
 }
 
-case class MasterComponent(name: String /*, priority: Int*/)
+case class MasterComponent(name: String, priority: Int)
 case class SlaveComponent(name: String, startAddress: Long, size: Long)
 
 class Description (val filename: String) {
@@ -33,8 +33,8 @@ class Description (val filename: String) {
   
   private def parseMaster(masterComponent: Node): MasterComponent = {
     val name = (masterComponent \ "name").text.toLowerCase().replace(" ", "_")
-    // val priority = (masterComponent \ "priority").text.toInt
-    MasterComponent(name /*, priority*/)
+    val priority = (masterComponent \ "priority").text.toInt
+    MasterComponent(name, priority)
   }
   
   val masterComponents = 
