@@ -12,9 +12,11 @@ case class OutputPath(path: String) extends CliOption
 object Cli extends App {
   val help = """Usage: [options] <XML_description_file_path>
     |
-    |By default, the bus is genrated and every tests are run. If one or more 
+    |By default, the bus is generated and every tests are run. If one or more 
     |of the options to generate or run tests is specified, only the specified 
     |generation and/or tests will be run. 
+    |
+    |Options:
     |
     |  --help, -h 
     |    Display this message.
