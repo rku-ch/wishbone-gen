@@ -7,7 +7,7 @@
     </description>
     <error>true</error>
     <retry>false</retry>
-    <bus_type>shared</bus_type> <!-- Only one implemented yet-->
+    <bus_type>shared</bus_type>
   </configuration>
   <arbiter>
     <description>
