@@ -6,7 +6,7 @@
       Includes all configurations that are global to the bus
     </description>
     <!-- Missing error tag -->
-    <error>true</error>
+    <!-- <error>true</error> -->
     <retry>false</retry>
     <bus_type>shared</bus_type>
   </configuration>
