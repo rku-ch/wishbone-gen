@@ -11,6 +11,7 @@ module SharedBus(
   output [31:0] cpu_data_interface_dat_i,
   output        cpu_data_interface_ack_i,
                 cpu_data_interface_err_i,
+                cpu_data_interface_rty_i,
   input  [31:0] cpu_instruction_interface_adr_o,
                 cpu_instruction_interface_dat_o,
   input  [3:0]  cpu_instruction_interface_sel_o,
@@ -20,6 +21,7 @@ module SharedBus(
   output [31:0] cpu_instruction_interface_dat_i,
   output        cpu_instruction_interface_ack_i,
                 cpu_instruction_interface_err_i,
+                cpu_instruction_interface_rty_i,
   output [31:0] main_memory_adr_i,
                 main_memory_dat_i,
   output [3:0]  main_memory_sel_i,
@@ -29,6 +31,7 @@ module SharedBus(
   input  [31:0] main_memory_dat_o,
   input         main_memory_ack_o,
                 main_memory_err_o,
+                main_memory_rty_o,
   output [31:0] led_matrix_0_adr_i,
                 led_matrix_0_dat_i,
   output [3:0]  led_matrix_0_sel_i,
@@ -38,6 +41,7 @@ module SharedBus(
   input  [31:0] led_matrix_0_dat_o,
   input         led_matrix_0_ack_o,
                 led_matrix_0_err_o,
+                led_matrix_0_rty_o,
   output [31:0] switches_0_adr_i,
                 switches_0_dat_i,
   output [3:0]  switches_0_sel_i,
@@ -47,6 +51,7 @@ module SharedBus(
   input  [31:0] switches_0_dat_o,
   input         switches_0_ack_o,
                 switches_0_err_o,
+                switches_0_rty_o,
   output        invalid_address
 );
 
@@ -87,6 +92,7 @@ module SharedBus(
               : main_memory_dat_o;
   wire        ack = main_memory_ack_o | led_matrix_0_ack_o | switches_0_ack_o;
   wire        err = main_memory_err_o | led_matrix_0_err_o | switches_0_err_o;
+  wire        rty = main_memory_rty_o | led_matrix_0_rty_o | switches_0_rty_o;
   wire        cyc_validated_stb =
     (masterSelect ? cpu_instruction_interface_stb_o : cpu_data_interface_stb_o) & cyc_out;
   always @(posedge clock) begin
@@ -113,9 +119,11 @@ module SharedBus(
   assign cpu_data_interface_dat_i = dat_r;
   assign cpu_data_interface_ack_i = ack & cpu_data_interface_grant;
   assign cpu_data_interface_err_i = err & cpu_data_interface_grant;
+  assign cpu_data_interface_rty_i = rty & cpu_data_interface_grant;
   assign cpu_instruction_interface_dat_i = dat_r;
   assign cpu_instruction_interface_ack_i = ack & cpu_instruction_interface_grant;
   assign cpu_instruction_interface_err_i = err & cpu_instruction_interface_grant;
+  assign cpu_instruction_interface_rty_i = rty & cpu_instruction_interface_grant;
   assign main_memory_adr_i = adr;
   assign main_memory_dat_i = dat_w;
   assign main_memory_sel_i = sel;

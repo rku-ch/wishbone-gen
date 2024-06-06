@@ -182,7 +182,7 @@ class SharedBus(busDescription: Description) extends BusModule(busDescription) {
       None
   val rty = if (busDescription.useRetry) 
       Some(slaveBundles.foldLeft(false.B)({ 
-        case (or, (i, slave)) => or | slave.err_o.get
+        case (or, (i, slave)) => or | slave.rty_o.get
       }))
     else 
       None

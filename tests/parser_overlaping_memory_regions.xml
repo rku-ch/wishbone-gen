@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This file describes the a complete system -->
+<bus_description>
+  <configuration>
+    <description>
+      Includes all configurations that are global to the bus
+    </description>
+    <error>true</error>
+    <retry>false</retry>
+    <bus_type>shared</bus_type>
+  </configuration>
+  <arbiter>
+    <description>
+      List of all master components with additional informations for an arbiter
+    </description>
+    <master_components>
+      <component>
+        <name>CPU Data Interface</name>
+        <priority>1</priority>
+      </component>
+      <component>
+        <name>CPU Instruction Interface</name>
+        <priority>1</priority>
+      </component>
+    </master_components>
+  </arbiter>
+  <memorymap>
+    <name>MemoryMap</name>
+    <description>
+      Memory map with name of memory section, start address and size in Bytes
+    </description>
+    <memory_regions>
+      <region>
+        <name>Main Memory</name>
+        <start_address>x00000000</start_address>
+        <size>4026531840</size>
+      </region>
+      <region>
+        <name>LED Matrix 0</name>
+        <!--- Overlap here -->
+        <start_address>xe0000000</start_address>
+        <size>3500</size>
+      </region>
+      <region>
+        <name>Switches 0</name>
+        <start_address>xf0000dac</start_address>
+        <size>4</size>
+      </region>
+    </memory_regions>
+  </memorymap>
+</bus_description>
