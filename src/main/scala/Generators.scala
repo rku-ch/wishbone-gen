@@ -28,7 +28,7 @@ class Generators(busDescription: Description, outputPath: Option[String]) {
       println("Generating Bus")
       ChiselStage.emitSystemVerilogFile(
         generateBus(),
-        args,
+        args ++ Array("--split-verilog"),
         firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info",
           "-lowering-options=disallowLocalVariables")
       )

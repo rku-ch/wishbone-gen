@@ -23,6 +23,7 @@ class Description (val filename: String) {
   private val configuration = xmlDescription \ "configuration"
   val useError = (configuration \ "error").text.toBoolean
   val useRetry = (configuration \ "retry").text.toBoolean
+  val exposeGrants = (configuration \ "expose_grants").text.toBoolean
   val busType: BusType = (configuration \ "bus_type").text match {
     case "shared" => BusType.SharedBus
     case _ => 

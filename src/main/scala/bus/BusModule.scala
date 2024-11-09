@@ -58,8 +58,8 @@ abstract class BusModule(busDescription: Description) extends Module {
   // Both components descriptions and component IO bundles are stored in a map
   // in ordered to always be properly indexed. This insure that in every 
   // internal parts/modules (such as the arbiter and address comparator) the 
-  // "result" indexed with e.g. 1 is always associated with the singals of the 
-  // slave indexed 1 wothout needing to pass the complete IO bundle associated 
+  // "result" indexed with e.g. 1 is always associated with the signals of the 
+  // slave indexed 1 without needing to pass the complete IO bundle associated 
   // with a given description
 
   val masterDescriptions = busDescription.masterComponents.zipWithIndex
@@ -75,6 +75,14 @@ abstract class BusModule(busDescription: Description) extends Module {
     ).suggestName(master.name)
   }})
 
+  val grants = if (busDescription.exposeGrants) {
+    Some(
+      masterDescriptions.map({ case (i, master) => {
+        i -> IO(Output(Bool())).suggestName(s"${master.name}_gnt")
+      }})
+    )
+  } else None
+
   val slaveDescriptions = busDescription.slaveComponents.zipWithIndex
     .map({case (slave, i)  => {
       i -> slave
@@ -87,6 +95,7 @@ abstract class BusModule(busDescription: Description) extends Module {
       busDescription.useRetry)
     ).suggestName(slave.name)
   }})
+
 
   val invalidAddress = IO(Output(Bool())).suggestName("invalid_address")
 }

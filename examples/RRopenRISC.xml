@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This file describes the a complete system -->
+<bus_description>
+  <configuration>
+    <description>
+      Includes all configurations that are global to the bus
+    </description>
+    <error>true</error>
+    <retry>false</retry>
+    <expose_grants>true</expose_grants>
+    <bus_type>shared</bus_type>
+  </configuration>
+  <arbiter>
+    <description>
+      List of all master components with additional informations for an arbiter
+    </description>
+    <master_components>
+      <component>
+        <name>or1420_instruction</name>
+        <priority>1</priority>
+      </component>
+      <component>
+        <name>or1420_data</name>
+        <priority>1</priority>
+      </component>
+      <component>
+        <name>hdmi_master</name>
+        <priority>1</priority>
+      </component>
+    </master_components>
+  </arbiter>
+  <memorymap>
+    <name>MemoryMap</name>
+    <description>
+      Memory map with name of memory section, start address and size in Bytes
+    </description>
+    <memory_regions>
+      <region>
+        <name>sdram</name>
+        <start_address>x00000000</start_address>
+        <size>67108864</size>
+      </region>
+      <!-- NO flash for now
+      <region>
+        <name>flash</name>
+        <start_address>x04000000</start_address>
+        <size>67108864</size>
+      </region> -->
+      <region>
+        <name>uart</name>
+        <start_address>x50000000</start_address>
+        <size>8</size>
+      </region>
+      <region>
+        <name>hdmi_slave</name>
+        <start_address>x50000020</start_address>
+        <size>16</size>
+      </region>
+      <!-- Not sure BIOS has to be included since it does not have a base address? -->
+      <region>
+        <name>bios</name>
+        <start_address>xF0000000</start_address>
+        <size>8192</size>
+      </region>
+    </memory_regions>
+  </memorymap>
+</bus_description>
