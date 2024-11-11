@@ -8,6 +8,7 @@
     <!-- Missing error tag -->
     <!-- <error>true</error> -->
     <retry>false</retry>
+    <expose_grants>true</expose_grants>
     <bus_type>shared</bus_type>
   </configuration>
   <arbiter>
