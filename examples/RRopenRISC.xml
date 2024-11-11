@@ -40,12 +40,11 @@
         <start_address>x00000000</start_address>
         <size>67108864</size>
       </region>
-      <!-- NO flash for now
       <region>
         <name>flash</name>
         <start_address>x04000000</start_address>
         <size>67108864</size>
-      </region> -->
+      </region>
       <region>
         <name>uart</name>
         <start_address>x50000000</start_address>
@@ -56,7 +55,6 @@
         <start_address>x50000020</start_address>
         <size>16</size>
       </region>
-      <!-- Not sure BIOS has to be included since it does not have a base address? -->
       <region>
         <name>bios</name>
         <start_address>xF0000000</start_address>

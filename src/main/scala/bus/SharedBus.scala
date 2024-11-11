@@ -43,7 +43,7 @@ class SharedBus(busDescription: Description) extends BusModule(busDescription) {
   // TODO: Move address comparator to a module
   val acmp = slaveDescriptions.map({ case (i, description) => {
     val matchAdr = Wire(Bool()).suggestName(s"amcp_${i}")
-    val endAdr = (description.startAddress.asUInt + description.size.asUInt)
+    val endAdr = (description.startAddress + description.size).asUInt
     when((adr >= description.startAddress.asUInt) & (adr < endAdr)) {
       matchAdr := true.B
     }.otherwise {
@@ -59,13 +59,7 @@ class SharedBus(busDescription: Description) extends BusModule(busDescription) {
   val dat_r = MuxCase(slaveBundles.head._2.dat_o,
       slaveBundles.map({ 
         case (i, slave) => {
-          val description = slaveDescriptions(i)
-          val endAdr = (description.startAddress.asUInt + description.size.asUInt)
-          val lower_bound = (adr >= description.startAddress.asUInt)
-            .suggestName(s"lower_bound_${i}")
-          val upper_bound = (adr < endAdr).suggestName(s"upper_bound_${i}")
-          val cond = lower_bound & (adr < endAdr)
-          (cond) -> slave.dat_o
+          (acmp(i)) -> slave.dat_o
         }
       }).toSeq
     ) 
