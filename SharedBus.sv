@@ -2,146 +2,178 @@
 module SharedBus(
   input         clock,
                 reset,
-  input  [31:0] cpu_data_interface_adr_o,
-                cpu_data_interface_dat_o,
-  input  [3:0]  cpu_data_interface_sel_o,
-  input         cpu_data_interface_we_o,
-                cpu_data_interface_stb_o,
-                cpu_data_interface_cyc_o,
-  output [31:0] cpu_data_interface_dat_i,
-  output        cpu_data_interface_ack_i,
-                cpu_data_interface_err_i,
-                cpu_data_interface_rty_i,
-  input  [31:0] cpu_instruction_interface_adr_o,
-                cpu_instruction_interface_dat_o,
-  input  [3:0]  cpu_instruction_interface_sel_o,
-  input         cpu_instruction_interface_we_o,
-                cpu_instruction_interface_stb_o,
-                cpu_instruction_interface_cyc_o,
-  output [31:0] cpu_instruction_interface_dat_i,
-  output        cpu_instruction_interface_ack_i,
-                cpu_instruction_interface_err_i,
-                cpu_instruction_interface_rty_i,
-  output [31:0] main_memory_adr_i,
-                main_memory_dat_i,
-  output [3:0]  main_memory_sel_i,
-  output        main_memory_we_i,
-                main_memory_stb_i,
-                main_memory_cyc_i,
-  input  [31:0] main_memory_dat_o,
-  input         main_memory_ack_o,
-                main_memory_err_o,
-                main_memory_rty_o,
-  output [31:0] led_matrix_0_adr_i,
-                led_matrix_0_dat_i,
-  output [3:0]  led_matrix_0_sel_i,
-  output        led_matrix_0_we_i,
-                led_matrix_0_stb_i,
-                led_matrix_0_cyc_i,
-  input  [31:0] led_matrix_0_dat_o,
-  input         led_matrix_0_ack_o,
-                led_matrix_0_err_o,
-                led_matrix_0_rty_o,
-  output [31:0] switches_0_adr_i,
-                switches_0_dat_i,
-  output [3:0]  switches_0_sel_i,
-  output        switches_0_we_i,
-                switches_0_stb_i,
-                switches_0_cyc_i,
-  input  [31:0] switches_0_dat_o,
-  input         switches_0_ack_o,
-                switches_0_err_o,
-                switches_0_rty_o,
+  input  [31:0] or1420_instruction_adr_o,
+                or1420_instruction_dat_o,
+  input  [3:0]  or1420_instruction_sel_o,
+  input         or1420_instruction_we_o,
+                or1420_instruction_stb_o,
+                or1420_instruction_cyc_o,
+  output [31:0] or1420_instruction_dat_i,
+  output        or1420_instruction_ack_i,
+                or1420_instruction_err_i,
+  input  [31:0] or1420_data_adr_o,
+                or1420_data_dat_o,
+  input  [3:0]  or1420_data_sel_o,
+  input         or1420_data_we_o,
+                or1420_data_stb_o,
+                or1420_data_cyc_o,
+  output [31:0] or1420_data_dat_i,
+  output        or1420_data_ack_i,
+                or1420_data_err_i,
+  input  [31:0] hdmi_master_adr_o,
+                hdmi_master_dat_o,
+  input  [3:0]  hdmi_master_sel_o,
+  input         hdmi_master_we_o,
+                hdmi_master_stb_o,
+                hdmi_master_cyc_o,
+  output [31:0] hdmi_master_dat_i,
+  output        hdmi_master_ack_i,
+                hdmi_master_err_i,
+                or1420_instruction_gnt,
+                or1420_data_gnt,
+                hdmi_master_gnt,
+  output [31:0] sdram_adr_i,
+                sdram_dat_i,
+  output [3:0]  sdram_sel_i,
+  output        sdram_we_i,
+                sdram_stb_i,
+                sdram_cyc_i,
+  input  [31:0] sdram_dat_o,
+  input         sdram_ack_o,
+                sdram_err_o,
+  output [31:0] flash_adr_i,
+                flash_dat_i,
+  output [3:0]  flash_sel_i,
+  output        flash_we_i,
+                flash_stb_i,
+                flash_cyc_i,
+  input  [31:0] flash_dat_o,
+  input         flash_ack_o,
+                flash_err_o,
+  output [31:0] uart_adr_i,
+                uart_dat_i,
+  output [3:0]  uart_sel_i,
+  output        uart_we_i,
+                uart_stb_i,
+                uart_cyc_i,
+  input  [31:0] uart_dat_o,
+  input         uart_ack_o,
+                uart_err_o,
+  output [31:0] hdmi_slave_adr_i,
+                hdmi_slave_dat_i,
+  output [3:0]  hdmi_slave_sel_i,
+  output        hdmi_slave_we_i,
+                hdmi_slave_stb_i,
+                hdmi_slave_cyc_i,
+  input  [31:0] hdmi_slave_dat_o,
+  input         hdmi_slave_ack_o,
+                hdmi_slave_err_o,
+  output [31:0] bios_adr_i,
+                bios_dat_i,
+  output [3:0]  bios_sel_i,
+  output        bios_we_i,
+                bios_stb_i,
+                bios_cyc_i,
+  input  [31:0] bios_dat_o,
+  input         bios_ack_o,
+                bios_err_o,
   output        invalid_address
 );
 
-  reg         cpu_data_interface_mask;
-  reg         cpu_instruction_interface_mask;
-  wire        unmasked_grant_1 =
-    ~cpu_data_interface_cyc_o & cpu_instruction_interface_cyc_o;
-  wire        masked_grant_0 = cpu_data_interface_cyc_o & cpu_data_interface_mask;
-  wire        masked_grant_1 =
-    ~masked_grant_0 & cpu_instruction_interface_cyc_o & cpu_instruction_interface_mask;
-  wire [1:0]  masked_grant_vec = {masked_grant_1, masked_grant_0};
-  wire [1:0]  unmasked_grant_vec = {unmasked_grant_1, cpu_data_interface_cyc_o};
-  reg         cpu_data_interface_grant;
-  reg         cpu_instruction_interface_grant;
-  reg         cyc_out;
-  wire        _GEN = (|unmasked_grant_vec) & unmasked_grant_1;
-  wire        masterSelect = (|masked_grant_vec) ? masked_grant_1 : _GEN;
+  wire        _arbiter_or1420_instruction_gnt;
+  wire        _arbiter_or1420_data_gnt;
+  wire        _arbiter_hdmi_master_gnt;
+  wire [1:0]  _arbiter_gntId;
+  wire        _arbiter_cyc_out;
+  wire        _stb_T_2 = _arbiter_gntId == 2'h1;
+  wire        _stb_T_4 = _arbiter_gntId == 2'h2;
   wire [31:0] adr =
-    masterSelect ? cpu_instruction_interface_adr_o : cpu_data_interface_adr_o;
+    _stb_T_4
+      ? hdmi_master_adr_o
+      : _stb_T_2 ? or1420_data_adr_o : or1420_instruction_adr_o;
   wire [31:0] dat_w =
-    masterSelect ? cpu_instruction_interface_dat_o : cpu_data_interface_dat_o;
+    _stb_T_4
+      ? hdmi_master_dat_o
+      : _stb_T_2 ? or1420_data_dat_o : or1420_instruction_dat_o;
   wire [3:0]  sel =
-    masterSelect ? cpu_instruction_interface_sel_o : cpu_data_interface_sel_o;
+    _stb_T_4
+      ? hdmi_master_sel_o
+      : _stb_T_2 ? or1420_data_sel_o : or1420_instruction_sel_o;
   wire        we =
-    masterSelect ? cpu_instruction_interface_we_o : cpu_data_interface_we_o;
-  wire        amcp_0 = adr[31:28] != 4'hF;
-  wire        dat_r_lower_bound_1 = adr > 32'hEFFFFFFF;
-  wire        amcp_1 = dat_r_lower_bound_1 & adr < 32'hF0000DAC;
-  wire        dat_r_lower_bound_2 = adr > 32'hF0000DAB;
-  wire        amcp_2 = dat_r_lower_bound_2 & adr < 32'hF0000DB0;
+    _stb_T_4 ? hdmi_master_we_o : _stb_T_2 ? or1420_data_we_o : or1420_instruction_we_o;
+  wire        amcp_0 = adr < 32'h4000000;
+  wire        amcp_1 = (|(adr[31:26])) & adr < 32'h8000000;
+  wire        amcp_2 = adr > 32'h4FFFFFFF & adr < 32'h50000008;
+  wire        amcp_3 = adr > 32'h5000001F & adr < 32'h50000030;
+  wire        amcp_4 = adr > 32'hEFFFFFFF & adr < 32'hF0002000;
   wire [31:0] dat_r =
-    adr[31:28] != 4'hF
-      ? main_memory_dat_o
-      : dat_r_lower_bound_1 & adr < 32'hF0000DAC
-          ? led_matrix_0_dat_o
-          : dat_r_lower_bound_2 & adr < 32'hF0000DB0
-              ? switches_0_dat_o
-              : main_memory_dat_o;
-  wire        ack = main_memory_ack_o | led_matrix_0_ack_o | switches_0_ack_o;
-  wire        err = main_memory_err_o | led_matrix_0_err_o | switches_0_err_o;
-  wire        rty = main_memory_rty_o | led_matrix_0_rty_o | switches_0_rty_o;
+    amcp_1
+      ? flash_dat_o
+      : amcp_4
+          ? bios_dat_o
+          : amcp_3 ? hdmi_slave_dat_o : amcp_0 | ~amcp_2 ? sdram_dat_o : uart_dat_o;
+  wire        ack =
+    sdram_ack_o | flash_ack_o | uart_ack_o | hdmi_slave_ack_o | bios_ack_o;
+  wire        err =
+    sdram_err_o | flash_err_o | uart_err_o | hdmi_slave_err_o | bios_err_o;
   wire        cyc_validated_stb =
-    (masterSelect ? cpu_instruction_interface_stb_o : cpu_data_interface_stb_o) & cyc_out;
-  always @(posedge clock) begin
-    if (reset) begin
-      cpu_data_interface_mask <= 1'h0;
-      cpu_instruction_interface_mask <= 1'h0;
-      cpu_data_interface_grant <= 1'h0;
-      cpu_instruction_interface_grant <= 1'h0;
-      cyc_out <= 1'h0;
-    end
-    else begin
-      if ((|masked_grant_vec) | (|unmasked_grant_vec))
-        cpu_data_interface_mask <= ~masterSelect;
-      cpu_instruction_interface_mask <=
-        (|masked_grant_vec) | (|unmasked_grant_vec) | cpu_instruction_interface_mask;
-      cpu_data_interface_grant <=
-        (|masked_grant_vec)
-          ? masked_grant_0
-          : (|unmasked_grant_vec) & cpu_data_interface_cyc_o;
-      cpu_instruction_interface_grant <= (|masked_grant_vec) ? masked_grant_1 : _GEN;
-      cyc_out <= |{cpu_instruction_interface_cyc_o, cpu_data_interface_cyc_o};
-    end
-  end // always @(posedge)
-  assign cpu_data_interface_dat_i = dat_r;
-  assign cpu_data_interface_ack_i = ack & cpu_data_interface_grant;
-  assign cpu_data_interface_err_i = err & cpu_data_interface_grant;
-  assign cpu_data_interface_rty_i = rty & cpu_data_interface_grant;
-  assign cpu_instruction_interface_dat_i = dat_r;
-  assign cpu_instruction_interface_ack_i = ack & cpu_instruction_interface_grant;
-  assign cpu_instruction_interface_err_i = err & cpu_instruction_interface_grant;
-  assign cpu_instruction_interface_rty_i = rty & cpu_instruction_interface_grant;
-  assign main_memory_adr_i = adr;
-  assign main_memory_dat_i = dat_w;
-  assign main_memory_sel_i = sel;
-  assign main_memory_we_i = we;
-  assign main_memory_stb_i = cyc_validated_stb & amcp_0;
-  assign main_memory_cyc_i = cyc_out;
-  assign led_matrix_0_adr_i = adr;
-  assign led_matrix_0_dat_i = dat_w;
-  assign led_matrix_0_sel_i = sel;
-  assign led_matrix_0_we_i = we;
-  assign led_matrix_0_stb_i = cyc_validated_stb & amcp_1;
-  assign led_matrix_0_cyc_i = cyc_out;
-  assign switches_0_adr_i = adr;
-  assign switches_0_dat_i = dat_w;
-  assign switches_0_sel_i = sel;
-  assign switches_0_we_i = we;
-  assign switches_0_stb_i = cyc_validated_stb & amcp_2;
-  assign switches_0_cyc_i = cyc_out;
-  assign invalid_address = ~(amcp_0 | amcp_1 | amcp_2);
+    (_stb_T_4
+       ? hdmi_master_stb_o
+       : _stb_T_2 ? or1420_data_stb_o : or1420_instruction_stb_o) & _arbiter_cyc_out;
+  WeightedRRArbiter arbiter (
+    .clock                  (clock),
+    .reset                  (reset),
+    .or1420_instruction_cyc (or1420_instruction_cyc_o),
+    .or1420_data_cyc        (or1420_data_cyc_o),
+    .hdmi_master_cyc        (hdmi_master_cyc_o),
+    .or1420_instruction_gnt (_arbiter_or1420_instruction_gnt),
+    .or1420_data_gnt        (_arbiter_or1420_data_gnt),
+    .hdmi_master_gnt        (_arbiter_hdmi_master_gnt),
+    .gntId                  (_arbiter_gntId),
+    .cyc_out                (_arbiter_cyc_out)
+  );
+  assign or1420_instruction_dat_i = dat_r;
+  assign or1420_instruction_ack_i = ack & _arbiter_or1420_instruction_gnt;
+  assign or1420_instruction_err_i = err & _arbiter_or1420_instruction_gnt;
+  assign or1420_data_dat_i = dat_r;
+  assign or1420_data_ack_i = ack & _arbiter_or1420_data_gnt;
+  assign or1420_data_err_i = err & _arbiter_or1420_data_gnt;
+  assign hdmi_master_dat_i = dat_r;
+  assign hdmi_master_ack_i = ack & _arbiter_hdmi_master_gnt;
+  assign hdmi_master_err_i = err & _arbiter_hdmi_master_gnt;
+  assign or1420_instruction_gnt = _arbiter_or1420_instruction_gnt;
+  assign or1420_data_gnt = _arbiter_or1420_data_gnt;
+  assign hdmi_master_gnt = _arbiter_hdmi_master_gnt;
+  assign sdram_adr_i = adr;
+  assign sdram_dat_i = dat_w;
+  assign sdram_sel_i = sel;
+  assign sdram_we_i = we;
+  assign sdram_stb_i = cyc_validated_stb & amcp_0;
+  assign sdram_cyc_i = _arbiter_cyc_out;
+  assign flash_adr_i = adr;
+  assign flash_dat_i = dat_w;
+  assign flash_sel_i = sel;
+  assign flash_we_i = we;
+  assign flash_stb_i = cyc_validated_stb & amcp_1;
+  assign flash_cyc_i = _arbiter_cyc_out;
+  assign uart_adr_i = adr;
+  assign uart_dat_i = dat_w;
+  assign uart_sel_i = sel;
+  assign uart_we_i = we;
+  assign uart_stb_i = cyc_validated_stb & amcp_2;
+  assign uart_cyc_i = _arbiter_cyc_out;
+  assign hdmi_slave_adr_i = adr;
+  assign hdmi_slave_dat_i = dat_w;
+  assign hdmi_slave_sel_i = sel;
+  assign hdmi_slave_we_i = we;
+  assign hdmi_slave_stb_i = cyc_validated_stb & amcp_3;
+  assign hdmi_slave_cyc_i = _arbiter_cyc_out;
+  assign bios_adr_i = adr;
+  assign bios_dat_i = dat_w;
+  assign bios_sel_i = sel;
+  assign bios_we_i = we;
+  assign bios_stb_i = cyc_validated_stb & amcp_4;
+  assign bios_cyc_i = _arbiter_cyc_out;
+  assign invalid_address = ~(amcp_0 | amcp_1 | amcp_2 | amcp_3 | amcp_4);
 endmodule
 

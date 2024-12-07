@@ -82,46 +82,51 @@ object Cli extends App {
     throw new IllegalArgumentException
   }
 
-  // If no option restrict the output, output everything 
-  val restrictingOptions = options.filter(opt => {
-    opt match {
-      case Bus() => true
-      case Test() => true
-      case GenericTest() => true
-      case _ => false
-    }
-  })
-  val finalOptions = if(restrictingOptions.isEmpty) 
-      options + Bus() + Test() + GenericTest()
-    else
-      options
-
-  // Try to load XML file, this may fail if the provided filename does not 
-  // exist or the XML is not formatted properly
-  val busDescription = new Description(filename.get)
-  
-  // Execute according to options
-  if(finalOptions.contains(Help())) {
+  if(options.contains(Help()) && options.size == 1) {
+    // Only diplay help if it's the only option used
     println(help)
-  }
-
-  val outputPath = finalOptions
-    .find(_ match {
-      case OutputPath(_) => true
-      case _ => false
-    }).map(_ match {
-      case OutputPath(path) => path
-      case _ => throw new IllegalStateException
+  } else {
+    // If no option restrict the output, output everything 
+    val restrictingOptions = options.filter(opt => {
+      opt match {
+        case Bus() => true
+        case Test() => true
+        case GenericTest() => true
+        case _ => false
+      }
     })
+    val finalOptions = if(restrictingOptions.isEmpty) 
+        options + Bus() + Test() + GenericTest()
+      else
+        options
 
-  val gen = new Generators(busDescription, outputPath)
-  if(finalOptions.contains(Bus())){
-    gen.outputBus()
-  }
-  if(finalOptions.contains(GenericTest())) {
-    gen.executeGenericTest()
-  }
-  if(finalOptions.contains(Test())){
-    gen.executeTest()
-  }
+    // Try to load XML file, this may fail if the provided filename does not 
+    // exist or the XML is not formatted properly
+    val busDescription = new Description(filename.get)
+    
+    // Execute according to options
+    if(finalOptions.contains(Help())) {
+      println(help)
+    }
+
+    val outputPath = finalOptions
+      .find(_ match {
+        case OutputPath(_) => true
+        case _ => false
+      }).map(_ match {
+        case OutputPath(path) => path
+        case _ => throw new IllegalStateException
+      })
+
+    val gen = new Generators(busDescription, outputPath)
+    if(finalOptions.contains(Bus())){
+      gen.outputBus()
+    }
+    if(finalOptions.contains(GenericTest())) {
+      gen.executeGenericTest()
+    }
+    if(finalOptions.contains(Test())){
+      gen.executeTest()
+    }
+  }  
 }

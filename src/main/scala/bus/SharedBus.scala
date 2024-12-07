@@ -1,7 +1,8 @@
 package ch.epfl.lap.wishbone_gen.bus
 
 import ch.epfl.lap.wishbone_gen._
-import ch.epfl.lap.wishbone_gen.bus.arbiter.RRArbiter
+import ch.epfl.lap.wishbone_gen.bus.arbiter._
+import ch.epfl.lap.wishbone_gen.ArbiterType._
 import chisel3._
 // _root_ disambiguates from package chisel3.util.circt if user imports chisel3.util._
 import chisel3.util.MuxLookup
@@ -12,7 +13,11 @@ import chisel3.util.OHToUInt
 
 class SharedBus(busDescription: Description) extends BusModule(busDescription) {  
   
-  val arbiter = Module(new RRArbiter(masterDescriptions))
+  val arbiter = Module(
+    busDescription.arbiterType match {
+      case RoundRobin => new WeightedRRArbiter(masterDescriptions)
+      case FixedPriority => new FixedPriorityArbiter(masterDescriptions)
+    })
   
   arbiter.arbiterInputs.foreach({case (i, arbiterIn) => 
     arbiterIn := masterBundles(i).cyc_o
@@ -37,6 +42,7 @@ class SharedBus(busDescription: Description) extends BusModule(busDescription) {
   val stb = MuxLookup(masterSelect, masterBundles.head._2.stb_o)(masters.map({ 
     case (i, master) => (i.asUInt, master.stb_o)
   }))
+  // TODO tagged master output need to be multiplexed
   val cyc = arbiter.cyc_out
 
   // Slaves to master wires
@@ -64,6 +70,7 @@ class SharedBus(busDescription: Description) extends BusModule(busDescription) {
       }).toSeq
     ) 
 
+  // TODO tagged slave outputs need to be multiplexed
   
   val ack = slaveBundles.foldLeft(false.B)({
     case (or, (i, slave)) => or | slave.ack_o

@@ -12,6 +12,16 @@ object BusType {
   // New bus types should be added there and treated in Generators
 }
 
+/**
+  * Arbiter type enum
+  */
+sealed abstract class ArbiterType 
+object ArbiterType {
+  case object RoundRobin extends ArbiterType
+  case object FixedPriority extends ArbiterType
+  // New arbiter types should be added there and treated in Generators
+}
+
 case class MasterComponent(name: String, priority: Int)
 case class SlaveComponent(name: String, startAddress: Long, size: Long)
 
@@ -37,9 +47,15 @@ class Description (val filename: String) {
     val priority = (masterComponent \ "priority").text.toInt
     MasterComponent(name, priority)
   }
-  
+  val arbiter = xmlDescription \ "arbiter"
+  val arbiterType = (arbiter \ "type").text match {
+    case "round_robin" => ArbiterType.RoundRobin
+    case "fixed_priority" => ArbiterType.FixedPriority
+    case _ => 
+      throw new IllegalArgumentException("Uknown or missing arbiter type")
+  }
   val masterComponents = 
-    (xmlDescription \ "arbiter" \ "master_components" \ "component")
+    (arbiter \ "master_components" \ "component")
     .map(node => parseMaster(node))
   
   // Parse memory map (slave components)

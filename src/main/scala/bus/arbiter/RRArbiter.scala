@@ -16,10 +16,6 @@ import chisel3.util.OHToUInt
 class RRArbiter(masterDescriptions: Map[Int, MasterComponent]) 
   extends ArbiterModule(masterDescriptions) {
   
-  // Scala collections are used everywhere, which produce ugly Verilog, but to 
-  // get modularity independently of the number of components, scala iterable 
-  // feel much more practical 
-  // Suggesting names make the Verilog code somewhat readable
   val masterGrants = grants.map({case (i, grantOut) => {
     val grant = RegInit(false.B).suggestName(s"s_gntReg${i}")
     grantOut := grant
@@ -28,6 +24,8 @@ class RRArbiter(masterDescriptions: Map[Int, MasterComponent])
 
   val masterSelect = gntId
   val s_cyc = RegNext(cyc_out, false.B).suggestName(s"s_cycReg")
+  cyc_out := (VecInit(arbiterInputs.map(in => in._2).toSeq).asUInt =/= 0.U)
+  masterSelect := 0.U
 
   val mask = masterDescriptions.map( {case (i, master) => {
     i -> RegInit(false.B).suggestName(s"${master.name}_mask")
@@ -66,8 +64,6 @@ class RRArbiter(masterDescriptions: Map[Int, MasterComponent])
   val unmaskedGrantVecUInt = unmaskedGrantVec.asUInt.suggestName("unmasked_grant_vec")
   simplePriority.foreach({ case (i, value) => { unmaskedGrantVec(i) :=  value }})
 
-  cyc_out := (VecInit(arbiterInputs.map(in => in._2).toSeq).asUInt =/= 0.U)
-  masterSelect := 0.U
   when(maskedGrantVecUInt > 0.U) {
     masterGrants.foreach({ case (i, masterGrant) => {
       masterGrant := maskedPriority(i)

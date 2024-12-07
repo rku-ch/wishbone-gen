@@ -14,10 +14,11 @@
     <description>
       List of all master components with additional informations for an arbiter
     </description>
+    <type>round_robin</type>
     <master_components>
       <component>
         <name>or1420_instruction</name>
-        <priority>1</priority>
+        <priority>4</priority>
       </component>
       <component>
         <name>or1420_data</name>
@@ -25,7 +26,7 @@
       </component>
       <component>
         <name>hdmi_master</name>
-        <priority>1</priority>
+        <priority>3</priority>
       </component>
     </master_components>
   </arbiter>
@@ -39,6 +40,11 @@
         <name>sdram</name>
         <start_address>x00000000</start_address>
         <size>67108864</size>
+        <!-- <signal>
+            <tag>TGA_I</tag>
+            <width>4</width>
+            <name>BS_I</name>
+        </signal> -->
       </region>
       <region>
         <name>flash</name>
