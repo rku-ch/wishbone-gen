@@ -8,11 +8,11 @@ import _root_.circt.stage.ChiselStage
   * Given a bus description, generate the appropriate bus and/or execute the 
   * appropriate tests
   */
-class Generators(busDescription: Description, outputPath: Option[String]) {
-    private val args = outputPath match {
-      case Some(path) => Array("--target-dir", path)
-      case None => Array[String]()
-    }
+class Generators(busDescription: Description, outputPath: Option[String], splitOutput: Boolean) {
+    private val args = (outputPath match {
+        case Some(path) => Array("--target-dir", path)
+        case None => Array[String]()
+      }) ++ (if (splitOutput) Array("--split-verilog") else Array())
 
     // Creating a function instead of a value solve the exception : 
     // java.lang.IllegalArgumentException: requirement failed: must be inside Builder context
@@ -28,7 +28,7 @@ class Generators(busDescription: Description, outputPath: Option[String]) {
       println("Generating Bus")
       ChiselStage.emitSystemVerilogFile(
         generateBus(),
-        args ++ Array("--split-verilog"),
+        args,
         firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info",
           "-lowering-options=disallowLocalVariables")
       )

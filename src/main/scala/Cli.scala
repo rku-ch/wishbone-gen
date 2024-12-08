@@ -8,6 +8,7 @@ case class Test() extends CliOption
 case class GenericTest() extends CliOption
 case class Bus() extends CliOption
 case class OutputPath(path: String) extends CliOption
+case class SplitOutput() extends CliOption
 
 object Cli extends App {
   val help = """Usage: [options] <XML_description_file_path>
@@ -33,6 +34,8 @@ object Cli extends App {
     |  --output-path, -o 
     |    Change the output path for all generated files.
     |
+    |  --split-output, -s
+    |    Split the generated verilog files by modules.
     """.stripMargin
 
   def parseArgs(remaining: List[String], options: Set[CliOption], filename: Option[String]): (Set[CliOption], Option[String]) = {
@@ -60,6 +63,8 @@ object Cli extends App {
             } else {
               parseArgs(fixedTail.tail, options + OutputPath(fixedTail.head), filename)
             }
+          case "--split-output" | "-s" =>
+            parseArgs(fixedTail, options + SplitOutput(), filename)
           case str => 
             // Assume any isolated non-option/option argument is the filename
             // Can be located anywhere in the arguments
@@ -118,7 +123,7 @@ object Cli extends App {
         case _ => throw new IllegalStateException
       })
 
-    val gen = new Generators(busDescription, outputPath)
+    val gen = new Generators(busDescription, outputPath, finalOptions.contains(SplitOutput()))
     if(finalOptions.contains(Bus())){
       gen.outputBus()
     }
