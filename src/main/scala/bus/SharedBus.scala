@@ -3,6 +3,7 @@ package ch.epfl.lap.wishbone_gen.bus
 import ch.epfl.lap.wishbone_gen._
 import ch.epfl.lap.wishbone_gen.bus.arbiter._
 import ch.epfl.lap.wishbone_gen.ArbiterType._
+import ch.epfl.lap.wishbone_gen.NameUtils._
 import chisel3._
 // _root_ disambiguates from package chisel3.util.circt if user imports chisel3.util._
 import chisel3.util.MuxLookup
@@ -42,7 +43,22 @@ class SharedBus(busDescription: Description) extends BusModule(busDescription) {
   val stb = MuxLookup(masterSelect, masterBundles.head._2.stb_o)(masters.map({ 
     case (i, master) => (i.asUInt, master.stb_o)
   }))
-  // TODO tagged master output need to be multiplexed
+
+  val customMasterOutputsNames = masterBundles.flatMap({ case (_, master) => 
+      master.custom_o.map(_._1) 
+    }).toSet
+
+  // Create muxes for master custom outputs
+  val masterCustomOutputs = customMasterOutputsNames.map(cname => {
+      val filteredMasters = masterBundles.filter(_._2.custom_o.contains(cname))
+      cname -> 
+      MuxLookup(masterSelect, filteredMasters.head._2.custom_o(cname))(filteredMasters.map({
+          case (i, master) => 
+            (i.asUInt, master.custom_o(cname))
+        }).toSeq
+      ).suggestName((cname))
+    }).toMap
+    
   val cyc = arbiter.cyc_out
 
   // Slaves to master wires
@@ -65,12 +81,25 @@ class SharedBus(busDescription: Description) extends BusModule(busDescription) {
   val dat_r = MuxCase(slaveBundles.head._2.dat_o,
       slaveBundles.map({ 
         case (i, slave) => {
-          (acmp(i)) -> slave.dat_o
+          acmp(i) -> slave.dat_o
         }
       }).toSeq
     ) 
 
-  // TODO tagged slave outputs need to be multiplexed
+  val customSlaveOutputsNames = slaveBundles.flatMap({ case (_, master) => 
+      master.custom_o.map(_._1) 
+    }).toSet 
+  // Create muxes for slave custom outputs
+  val slaveCustomOutputs = customSlaveOutputsNames.map(cname => {
+      val filteredSlaves = slaveBundles.filter(_._2.custom_o.contains(cname))
+      cname -> 
+      MuxCase(filteredSlaves.head._2.custom_o(cname), 
+        filteredSlaves.map({
+          case (i, slave) => 
+            acmp(i) -> slave.custom_o(cname)
+        }).toSeq
+      ).suggestName(cname+"_r")
+    }).toMap
   
   val ack = slaveBundles.foldLeft(false.B)({
     case (or, (i, slave)) => or | slave.ack_o
@@ -94,6 +123,10 @@ class SharedBus(busDescription: Description) extends BusModule(busDescription) {
     if (busDescription.useError) { master.err_i.get := err.get & arbiter.grants(i) }
     if (busDescription.useRetry) { master.rty_i.get := rty.get & arbiter.grants(i) }
     if (busDescription.exposeGrants) {grants.get(i) := arbiter.grants(i)}
+    // Custom signals
+    master.custom_i.foreach({ case (cname, s) => 
+        s := slaveCustomOutputs(cname)
+      })
   }})
 
   slaveBundles.foreach({ case (i, slave) => {
@@ -104,6 +137,10 @@ class SharedBus(busDescription: Description) extends BusModule(busDescription) {
     slave.cyc_i := cyc
     val cyc_validated_stb = stb & cyc
     slave.stb_i := cyc_validated_stb & acmp(i)
+    // Custom signals
+    slave.custom_i.foreach({ case (cname, s) => 
+        s := masterCustomOutputs(cname)
+      })
   }})
 
 }

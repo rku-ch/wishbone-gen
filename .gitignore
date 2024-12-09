@@ -41,3 +41,7 @@ bin/
 
 # general
 *.class
+
+# Generated verilog
+*.sv
+filelist.f

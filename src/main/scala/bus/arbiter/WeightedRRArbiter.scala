@@ -18,7 +18,7 @@ class WeightedRRArbiter(masterDescriptions: Map[Int, MasterComponent])
     .foldLeft(Nil: List[((Int,Int), MasterComponent)])( {case (duplicated, (i, master)) => 
         duplicated ++: (for (
           p <- 0 until master.priority
-        ) yield (p, i) -> MasterComponent(s"${master.name}_${p}", 1)).toList
+        ) yield (p, i) -> MasterComponent(s"${master.name}_${p}", 1, Nil)).toList
     })
     // Avoid AAABBC -> get ABCABA instead
     .sortWith({case (((p1, i1), _), ((p2, i2), _)) => 
