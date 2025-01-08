@@ -153,7 +153,7 @@ class Description (val filename: String) {
 
   }
 
-  val masterCutomSignals = masterComponents
+  val masterCustomSignals = masterComponents
     .foldLeft(Map.empty: Map[String, (TagType, Int)])({ case (knownSignals, component) =>
       knownSignals ++ 
       component.customSignals.foldLeft(knownSignals)({ case (newKnownSignals, s) =>
@@ -173,15 +173,15 @@ class Description (val filename: String) {
       })
     })
   
-  val slaveSuctomSignals = slaveComponents
+  val slaveCustomSignals = slaveComponents
     .foldLeft(Map.empty: Map[String, (TagType, Int)])({ case (knownSignals, component) => 
       knownSignals ++ 
       component.customSignals.foldLeft(knownSignals)({ case (newKnownSignals, s) =>
-        if(!masterCutomSignals.contains(s.name)) {
+        if(!masterCustomSignals.contains(s.name)) {
           throw new IllegalArgumentException(s"Slave custom signal ${s.name} " +
             s"has no corresponding signal in any master component!")
         } else {
-          val knownSignal = masterCutomSignals(s.name)
+          val knownSignal = masterCustomSignals(s.name)
           val tagsEquivalent = (knownSignal._1 == TagType.TGA_O && s.tag == TagType.TGA_I
             || knownSignal._1 == TagType.TGD_I && s.tag == TagType.TGD_O
             || knownSignal._1 == TagType.TGD_O && s.tag == TagType.TGD_I
@@ -212,7 +212,7 @@ class Description (val filename: String) {
       })
     })
     
-  masterCutomSignals.removedAll(slaveSuctomSignals.keySet)
+  masterCustomSignals.removedAll(slaveCustomSignals.keySet)
     .foreach( s => {
       val name = s._1
       throw new IllegalArgumentException(s"Master custom signal ${name} has no" +
