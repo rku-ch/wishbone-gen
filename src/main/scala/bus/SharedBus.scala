@@ -119,10 +119,10 @@ class SharedBus(busDescription: Description) extends BusModule(busDescription) {
   
   masterBundles.foreach({ case (i, master) => {
     master.dat_i := dat_r
-    master.ack_i := ack & arbiter.grants(i)
-    if (busDescription.useError) { master.err_i.get := err.get & arbiter.grants(i) }
-    if (busDescription.useRetry) { master.rty_i.get := rty.get & arbiter.grants(i) }
-    if (busDescription.exposeGrants) {grants.get(i) := arbiter.grants(i)}
+    master.ack_i := ack & arbiter.grantsOut(i)
+    if (busDescription.useError) { master.err_i.get := err.get & arbiter.grantsOut(i) }
+    if (busDescription.useRetry) { master.rty_i.get := rty.get & arbiter.grantsOut(i) }
+    if (busDescription.exposeGrants) {grants.get(i) := arbiter.grantsOut(i)}
     // Custom signals
     master.custom_i.foreach({ case (cname, s) => 
         s := slaveCustomOutputs(cname)

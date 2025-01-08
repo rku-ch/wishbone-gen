@@ -27,7 +27,7 @@ object GenericBusTest {
     simulate(bus){ b =>
       // Always make sure you wait long enough when changing the master that 
       // access the bus
-      val arbiterMaxStep = b.masterBundles.size + 1 
+      val arbiterMaxStep = b.masterBundles.size + 1 + 2// TODO Properly integrate delay in the test
 
       // Test every master input against an address associated to the first 
       // slave

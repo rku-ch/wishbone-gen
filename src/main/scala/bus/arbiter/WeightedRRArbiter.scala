@@ -34,17 +34,12 @@ class WeightedRRArbiter(masterDescriptions: Map[Int, MasterComponent])
 
   val rr = Module(new RRArbiter(asRRInput))
 
-  rr.arbiterInputs.map({case (rr_i, cyc) => 
+  rr.cycs.map({case (rr_i, cyc) => 
       cyc := arbiterInputs(duplicatedMasters(rr_i)._1._2)
     })
-  grants.map({case (i, grantOut) => 
-      grantOut := 
+  grants.map({case (i, grant) => 
+      grant := 
         duplicatedMasters.filter({case (rr_i, ((_, i_d), _)) => i == i_d})
-        .foldLeft(false.B)({case (out, (rr_i, ((_, _), _))) => out | rr.grants(rr_i) })
+        .foldLeft(false.B)({case (out, (rr_i, ((_, _), _))) => out | rr.grantsOut(rr_i) })
     })
-
-  val grantsVec = Wire(Vec(grants.size, Bool()))
-  grants.foreach({case (i, grantOut) => grantsVec(i) := grantOut})
-  gntId := OHToUInt(grantsVec)
-  cyc_out := rr.cyc_out
 }

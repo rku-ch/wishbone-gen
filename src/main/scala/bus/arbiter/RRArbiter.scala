@@ -13,18 +13,23 @@ import chisel3.util.OHToUInt
   * (also easier to synthesize according to the paper)
   * It's also reasonable to write for arbitrary size 
   */
-class RRArbiter(masterDescriptions: Map[Int, MasterComponent]) 
-  extends ArbiterModule(masterDescriptions) {
+class RRArbiter(masterDescriptions: Map[Int, MasterComponent]) extends Module {
   
-  val masterGrants = grants.map({case (i, grantOut) => {
+  val cycs = masterDescriptions.map({case (i, master) => 
+    i -> IO(Input(Bool()).suggestName(s"${master.name}_cyc"))
+  })
+
+  val grantsOut = masterDescriptions.map( {case (i, master) => {
+    i -> IO(Output(Bool()).suggestName(s"${master.name}_gnt"))
+  }})
+
+  val masterGrants = grantsOut.map({case (i, grantOut) => {
     val grant = RegInit(false.B).suggestName(s"s_gntReg${i}")
     grantOut := grant
     i -> grant
   }})
 
-  val masterSelect = gntId
-  val s_cyc = RegNext(cyc_out, false.B).suggestName(s"s_cycReg")
-  cyc_out := (VecInit(arbiterInputs.map(in => in._2).toSeq).asUInt =/= 0.U)
+  val masterSelect = Wire(UInt())
   masterSelect := 0.U
 
   val mask = masterDescriptions.map( {case (i, master) => {
@@ -32,20 +37,20 @@ class RRArbiter(masterDescriptions: Map[Int, MasterComponent])
   }})
 
   // Select the first bit with value 1 
-  val simplePriority = arbiterInputs.map({ case (i, input) =>
-      // This filter is an excess of precaution for ordering
+  val simplePriority = cycs.map({ case (i, input) =>
+    // This filter is an excess of precaution for ordering
     i -> (
-      arbiterInputs
+      cycs
       .filter({case (j, _) =>  j < i}) 
       .foldLeft(true.B)({case (and, (_, value)) => and & ~value})
-      & arbiterInputs(i))
+      & cycs(i))
       .suggestName(s"${masterDescriptions(i).name}_unmasked_grant")
   })
-  val maskedInputs = arbiterInputs.map({ case (i, input) => {
-    i -> (arbiterInputs(i) & mask(i))
+  val maskedInputs = cycs.map({ case (i, input) => {
+    i -> (cycs(i) & mask(i))
     .suggestName(s"${masterDescriptions(i).name}_masked_input")
   }})
-  val maskedPriority = arbiterInputs.map({ case (i, input) =>
+  val maskedPriority = cycs.map({ case (i, input) =>
       // This filter is an excess of precaution for ordering
     i -> (
       maskedInputs
