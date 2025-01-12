@@ -43,6 +43,15 @@
           <width>8</width>
         </signal>
       </component>
+      <component>
+        <name>camera</name>
+        <priority>1</priority>
+        <signal>
+          <tag>TGA_O</tag>
+          <name>BSR</name>
+          <width>8</width>
+        </signal>
+      </component>
     </master_components>
   </arbiter>
   <memorymap>

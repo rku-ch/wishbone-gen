@@ -14,9 +14,9 @@ import chisel3.util.OHToUInt
   * It's also reasonable to write for arbitrary size 
   */
 class RRArbiter(masterDescriptions: Map[Int, MasterComponent]) 
-  extends ArbiterModule(masterDescriptions) {
+  extends BaseArbiterModule(masterDescriptions) {
   
-  val masterGrants = grants.map({case (i, grantOut) => {
+  val masterGrants = grantsOut.map({case (i, grantOut) => {
     val grant = RegInit(false.B).suggestName(s"s_gntReg${i}")
     grantOut := grant
     i -> grant

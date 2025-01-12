@@ -14,7 +14,7 @@
     <description>
       List of all master components with additional informations for an arbiter
     </description>
-    <type>round_robin</type>
+    <type>fixed_priority</type>
     <master_components>
       <component>
         <name>or1420_instruction</name>
@@ -27,7 +27,7 @@
       </component>
       <component>
         <name>or1420_data</name>
-        <priority>1</priority>
+        <priority>2</priority>
         <signal>
           <tag>TGA_O</tag>
           <name>BSR</name>
@@ -36,7 +36,16 @@
       </component>
       <component>
         <name>hdmi_master</name>
-        <priority>1</priority>
+        <priority>3</priority>
+        <signal>
+          <tag>TGA_O</tag>
+          <name>BSR</name>
+          <width>8</width>
+        </signal>
+      </component>
+      <component>
+        <name>camera</name>
+        <priority>4</priority>
         <signal>
           <tag>TGA_O</tag>
           <name>BSR</name>

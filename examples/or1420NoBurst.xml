@@ -19,29 +19,14 @@
       <component>
         <name>or1420_instruction</name>
         <priority>1</priority>
-        <signal>
-          <tag>TGA_O</tag>
-          <name>BSR</name>
-          <width>8</width>
-        </signal>
       </component>
       <component>
         <name>or1420_data</name>
         <priority>1</priority>
-        <signal>
-          <tag>TGA_O</tag>
-          <name>BSR</name>
-          <width>8</width>
-        </signal>
       </component>
       <component>
         <name>hdmi_master</name>
         <priority>1</priority>
-        <signal>
-          <tag>TGA_O</tag>
-          <name>BSR</name>
-          <width>8</width>
-        </signal>
       </component>
     </master_components>
   </arbiter>
@@ -55,43 +40,26 @@
         <name>sdram</name>
         <start_address>x00000000</start_address>
         <size>67108864</size>
-        <signal>
-          <tag>TGA_I</tag>
-          <name>BSR</name>
-          <width>8</width>
-        </signal>
       </region>
       <region>
         <name>flash</name>
         <start_address>x04000000</start_address>
         <size>67108864</size>
-        <signal>
-          <tag>TGA_I</tag>
-          <name>BSR</name>
-          <width>8</width>
-        </signal>
       </region>
       <region>
         <name>uart</name>
         <start_address>x50000000</start_address>
         <size>8</size>
-        <!-- UART Cannot use burst-->
       </region>
       <region>
         <name>hdmi_slave</name>
         <start_address>x50000020</start_address>
         <size>16</size>
-        <!-- HDMI slave Cannot use burst-->
       </region>
       <region>
         <name>bios</name>
         <start_address>xF0000000</start_address>
         <size>8192</size>
-        <signal>
-          <tag>TGA_I</tag>
-          <name>BSR</name>
-          <width>8</width>
-        </signal>
       </region>
     </memory_regions>
   </memorymap>

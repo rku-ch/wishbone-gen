@@ -8,9 +8,9 @@ import chisel3.simulator.EphemeralSimulator._
 /**
   * Test Shared buses
   */
-object SharedBusTest {
+object RoundRobinSharedBusTest {
   def apply(bus: => SharedBus) = {
-    println(s"Starting test for Shared Bus")
+    println(s"Starting test for Round Robin Shared Bus")
     simulate(bus){ b => 
 
       // Generate every permutations

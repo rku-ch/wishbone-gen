@@ -4,14 +4,14 @@ import ch.epfl.lap.wishbone_gen._
 import ch.epfl.lap.wishbone_gen.bus._
 import chisel3._
 
-class ArbiterModule(masterDescriptions: Map[Int, MasterComponent])
+class BaseArbiterModule(masterDescriptions: Map[Int, MasterComponent])
   extends Module {
   
   val arbiterInputs = masterDescriptions.map({case (i, master) => 
     i -> IO(Input(Bool()).suggestName(s"${master.name}_cyc"))
   })
 
-  val grants = masterDescriptions.map( {case (i, master) => {
+  val grantsOut = masterDescriptions.map( {case (i, master) => {
     i -> IO(Output(Bool()).suggestName(s"${master.name}_gnt"))
   }})
 

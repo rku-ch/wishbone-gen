@@ -41,7 +41,11 @@ class Generators(busDescription: Description, outputPath: Option[String], splitO
 
     def executeTest() = {
       busDescription.busType match {
-        case BusType.SharedBus => SharedBusTest(generateBus())
+        case BusType.SharedBus => 
+          busDescription.arbiterType match {
+            case ArbiterType.RoundRobin => RoundRobinSharedBusTest(generateBus())
+            case ArbiterType.FixedPriority => FixedPrioritySharedBusTest(generateBus())
+          } 
         case _ => throw new IllegalArgumentException("Every bus should have " +
           "a test associated to it")
       }
