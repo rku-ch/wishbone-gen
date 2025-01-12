@@ -10,13 +10,13 @@ class SharedBusTest extends AnyFlatSpec{
   it should "pass validation with more components and both optional signal" in {
     // Test with more componenet
     val busDescription = new Description("tests/shared_bus_more_components.xml")
-    val tester = new Generators(busDescription, None)
+    val tester = new Generators(busDescription, None, false)
     tester.executeGenericTest()
     tester.executeTest()
   } 
   it should "pass validation with less components and no optional signals" in {
     val busDescription = new Description("tests/shared_bus_less_components.xml")
-    val tester = new Generators(busDescription, None)
+    val tester = new Generators(busDescription, None, false)
     tester.executeGenericTest()
     tester.executeTest()
   } 
