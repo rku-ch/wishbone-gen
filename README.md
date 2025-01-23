@@ -49,11 +49,11 @@ You can find an example of an XML description in the `examples/or1420RoundRobin_
 
 In your description, you can add custom signals to your bus architecture. For more information on these custom signals including tag types, refer to the Wishbone specification, notably section 3.1.6.
 
-The custom signals are matched together by their <name> elements and to avoid most errors the following properties are verified when parsing the description: 
+The custom signals are matched together by their `<name>` elements and to avoid most errors the following properties are verified when parsing the description: 
 
 - All signals that have the same name must have the same width.
 - If two components with the same role (both masters or both slaves) use a custom signal with the same name, their tags also have to be the same.
-- If two components with opposite roles (one master, one slave) use a custom signal with the same name, their tags have to correspond. E.g., *TGA_O* on master and *TGA_I* on the slave.
+- If two components with opposite roles (one master, one slave) use a custom signal with the same name, their tags have to correspond. E.g., `TGA_O` on master and `TGA_I` on the slave.
 - If a custom signal is present in a master component, it needs to be present in at least one slave component and vice versa.
 
 ## Add a new type of bus
